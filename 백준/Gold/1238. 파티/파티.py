@@ -1,10 +1,10 @@
+import heapq
 import sys
 input = sys.stdin.readline
 INF = int(1e9)
 
 n, m, x = map(int, input().split())
 graph = [[] for _ in range(n+1)]
-visited = [False]*(n+1)
 distance = [INF]*(n+1)
 result = [0]*(n+1)
 max_dist = 0
@@ -14,28 +14,19 @@ for i in range(m):
     graph[a].append((b, c))
 
 
-def small_dist_node():
-    min_value = INF
-    index = 0
-    for u in range(1, n+1):
-        if distance[u] < min_value and not visited[u]:
-            min_value = distance[u]
-            index = u
-    return index
-
-
 def dijkstra(start, end):
+    hq = []  # (거리, end노드)
+    heapq.heappush(hq, (0, start))
     distance[start] = 0
-    visited[start] = True
-    for j in graph[start]:
-        distance[j[0]] = j[1]
-    for k in range(n-1):
-        now = small_dist_node()
-        visited[now] = True
-        for j in graph[now]:
-            cost = distance[now] + j[1]
-            if distance[j[0]] > cost:
-                distance[j[0]] = cost
+    while hq:
+        dist, now = heapq.heappop(hq)
+        if distance[now] < dist:
+            continue
+        for i in graph[now]:
+            cost = dist + i[1]
+            if cost < distance[i[0]]:
+                distance[i[0]] = cost
+                heapq.heappush(hq, (cost, i[0]))
     return distance[end]
 
 
@@ -46,7 +37,6 @@ for i in range(1, n+1):
 
 for i in range(1, n+1):
     if i is not x:
-        visited = [False]*(n+1)
         distance = [INF]*(n+1)
         result[i] += dijkstra(i, x)
 
